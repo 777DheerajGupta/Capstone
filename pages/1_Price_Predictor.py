@@ -1,13 +1,47 @@
 import streamlit as st
-import pickle
 import pandas as pd
 import numpy as np
+
+import os
+import requests
+import pickle
+
+# URL for the .pkl file in the GitHub release
+url = "https://github.com/777DheerajGupta/Capstone/releases/download/v1.0/pipeline.pkl"
+local_filename = "pipeline.pkl"
+
+# Check if the file already exists locally
+if not os.path.exists(local_filename):
+    try:
+        # Step 1: Download the .pkl file from the GitHub release
+        print("Downloading the .pkl file...")
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+
+        # Step 2: Save the file locally
+        with open(local_filename, "wb") as f:
+            f.write(response.content)
+        print(f"File {local_filename} downloaded successfully.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading the file: {e}")
+else:
+    print(f"File {local_filename} already exists. Skipping download.")
+
+# Step 3: Load the model from the downloaded (or already existing) file
+try:
+    with open('pipeline.pkl', 'rb') as file:
+        pipeline = pickle.load(file)
+    print("Model loaded successfully.")
+except (pickle.UnpicklingError, FileNotFoundError) as e:
+    print(f"Error loading the model: {e}")
+
 # Load the dataset
 with open('df.pkl', 'rb') as file:
     df = pickle.load(file)
 
-with open('pipeline.pkl', 'rb') as file:
-    pipeline = pickle.load(file)
+# with open('pipeline.pkl', 'rb') as file:
+#     pipeline = pickle.load(file)
 
 st.title("Real Estate Price Prediction")
 
